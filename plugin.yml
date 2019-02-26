@@ -1,0 +1,6 @@
+name: "MailSystem"
+description: "Message the bot to send anyone a message next time they join"
+authors:
+  - "IronException"
+version: "1.0"
+mainClass: "Main"

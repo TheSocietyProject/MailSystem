@@ -18,8 +18,11 @@ public class Main extends RePlugin implements SimpleListener {
     // when sb sends u a msg with that command the bot knows to save that..
     // msg must be like .... wispers you: command McName msg
     public final String command = "!send";
-    public final String wisp = "wispers";
+    public final String wisp = " whispers: ";
     public ArrayList<MessageToSend> toSend = new ArrayList<>(); // TODO load all the msgs
+
+    public int var_TestPlayersInitialDelay = 1000; //1 * 60 * 1000;
+    public int var_TestPlayersPeriod = 1000; // 3 * 60 * 1000; // TODO give good values
 
 
     private ScheduledExecutorService executor;
@@ -36,7 +39,7 @@ public class Main extends RePlugin implements SimpleListener {
     public void onPluginEnable() {
         future = executor.scheduleAtFixedRate(() -> {
             testSbCame();
-        }, 1L, 3L, TimeUnit.MINUTES); // TODO give good values
+        }, var_TestPlayersInitialDelay, var_TestPlayersPeriod, TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -59,8 +62,11 @@ public class Main extends RePlugin implements SimpleListener {
         for (PlayerListEntry pp : players) {
             p = pp.getProfile();
 
-            for(MessageToSend m : toSend){
-                m.testToSend(p);
+            for(MessageToSend m : toSend) {
+                if (m.testToSend(p)){
+                    toSend.remove(m);
+                    return;
+                }
             }
 
         }
@@ -76,21 +82,31 @@ public class Main extends RePlugin implements SimpleListener {
         if(!msg.contains(wisp))
             return;
 
+        //
         try {
-
+            // TODO anonymos
             String author = msg.split(wisp)[0];
 
             msg = msg.split(wisp)[1];
+
+
             if(!msg.contains(command))
                 return;
 
-            msg = msg.split(command)[1];
+
+
+            msg = msg.split(command + " ")[1];
+
 
             String receiver = msg.split(" ")[0];
 
-            toSend.add(new MessageToSend(new GameProfile("", author), new GameProfile("", receiver), msg.substring(author.length())));
+            toSend.add(new MessageToSend(new GameProfile("", author), new GameProfile("", receiver), msg.substring(receiver.length() + 1)));// + 1 for the space
             // TODO smh also save that in the database || save it on shutdown or sth
-        } catch (Exception ex){}
+            System.out.println("HERE: added in array");
+        } catch (Exception ex){
+            System.out.println("HERE: got ERROR: " + ex);
+            // TODO whisper back
+        }
     }
 
 
